@@ -1,0 +1,111 @@
+﻿@page "/productos"
+@using Products.Models
+<h3>Productos</h3>
+
+
+@if (puedeGuardar)
+{
+    <ul>
+        <li>Inventario: @nuevoProducto.Inventario</li>
+        <li>Nombre: @nuevoProducto.Nombre</li>
+        <li>Departamento: @nuevoProducto.Departamento</li>
+    </ul>
+}
+
+<EditForm Model="nuevoProducto" OnValidSubmit="GuardarProducto">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <div class="col-2">
+            <label>Inventario:</label>
+            <InputNumber id="txtInventario" @bind-Value="nuevoProducto.Inventario" />
+            <ValidationMessage For="@(() => nuevoProducto.Inventario)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-10">
+            <label>Nombre:</label>
+            <InputText id="txtNombre" @bind-Value="nuevoProducto.Nombre" />
+            <ValidationMessage For="@(() => nuevoProducto.Nombre)" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-10">
+            <label>Departamento:</label>
+            <div>
+                <InputCheckbox @bind-Value="nuevoProducto.DepartamentoFrutas" /> Frutas
+                <InputCheckbox @bind-Value="nuevoProducto.DepartamentoVerduras" /> Verduras
+                <InputCheckbox @bind-Value="nuevoProducto.DepartamentoLacteos" /> Lacteos
+            </div>
+            <ValidationMessage For="@(() => nuevoProducto.Departamento)" />
+        </div>
+    </div>
+
+    <ValidationSummary />
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</EditForm>
+
+<table>
+    <thead>
+        <tr>
+            <th>Inventario</th>
+            <th>Nombre</th>
+            <th>Departamento</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var producto in productos)
+        {
+            <tr>
+                <td>@producto.Inventario</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Departamento</td>
+                <td><button @onclick="() => EliminarProducto(producto)">Eliminar</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Producto nuevoProducto = new Producto();
+    private List<Producto> productos = new List<Producto>();
+
+    private bool puedeGuardar => !string.IsNullOrWhiteSpace(nuevoProducto.Nombre) &&
+                                 nuevoProducto.Inventario > 0;
+
+    private void GuardarProducto()
+    {
+        productos.Add(nuevoProducto);
+        nuevoProducto = new Producto();
+    }
+
+    private void EliminarProducto(Producto producto)
+    {
+        productos.Remove(producto);
+    }
+
+    public class Producto
+    {
+        public int Inventario { get; set; }
+        public string? Nombre { get; set; }
+        public bool DepartamentoFrutas { get; set; }
+        public bool DepartamentoVerduras { get; set; }
+        public bool DepartamentoLacteos { get; set; }
+
+        public string Departamento
+        {
+            get
+            {
+                var departamentos = new List<string>();
+                if (DepartamentoFrutas) departamentos.Add("Frutas");
+                if (DepartamentoVerduras) departamentos.Add("Verduras");
+                if (DepartamentoLacteos) departamentos.Add("Lacteos");
+                return string.Join(", ", departamentos);
+            }
+        }
+    }
+}
